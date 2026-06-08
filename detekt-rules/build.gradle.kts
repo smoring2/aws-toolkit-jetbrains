@@ -14,6 +14,7 @@ dependencies {
     testImplementation(libs.assertj)
 
     testRuntimeOnly(libs.slf4j.api)
+    testRuntimeOnly(libs.logback.classic)
     testRuntimeOnly(libs.junit5.jupiterVintage)
 }
 
