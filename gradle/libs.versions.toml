@@ -24,6 +24,7 @@ node-gradle = "7.0.1"
 telemetryGenerator = "1.0.176"
 testLogger = "3.1.0"
 testRetry = "1.5.2"
+logback = "1.2.13"
 slf4j = "1.7.36"
 sshd = "2.11.0"
 wiremock = "2.35.0"
@@ -93,6 +94,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 mockk = { module = "io.mockk:mockk", version.ref="mockk" }
 telemetryGenerator = { module = "software.aws.toolkits:telemetry-generator", version.ref = "telemetryGenerator" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 sshd-core = { module = "org.apache.sshd:sshd-core", version.ref = "sshd" }
 sshd-scp = { module = "org.apache.sshd:sshd-scp", version.ref = "sshd" }
