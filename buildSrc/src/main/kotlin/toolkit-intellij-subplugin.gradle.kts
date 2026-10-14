@@ -165,7 +165,7 @@ tasks.withType<Test>().all {
     useJUnitPlatform()
 }
 
-tasks.withType<JavaExec> {
+tasks.withType<JavaExec>().configureEach {
     systemProperty("aws.toolkits.enableTelemetry", false)
 }
 

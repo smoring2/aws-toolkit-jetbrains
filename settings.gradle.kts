@@ -52,8 +52,8 @@ include("detekt-rules")
 include("mynah-ui")
 
 plugins {
-    id("com.gradle.enterprise").version("3.4.1")
-    id("com.github.burrunan.s3-build-cache").version("1.5")
+    id("com.gradle.enterprise").version("3.16.2")
+    id("com.github.burrunan.s3-build-cache").version("1.9.1")
 }
 
 gradleEnterprise {
