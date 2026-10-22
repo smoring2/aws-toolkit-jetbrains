@@ -49,6 +49,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
@@ -294,11 +295,24 @@ class CodeWhispererCodeScanSession(val sessionContext: CodeScanSessionContext) {
             value
         }.flatten()
         LOG.debug { "Total code scan issues returned from service: ${scanRecommendations.size}" }
+        val normalizedProjectRoot = Path.of(sessionContext.sessionConfig.projectRoot.path).normalize()
         return scanRecommendations.mapNotNull {
             val file = try {
-                LocalFileSystem.getInstance().findFileByIoFile(
-                    Path.of(sessionContext.sessionConfig.projectRoot.path, it.filePath).toFile()
-                )
+                // Reject absolute filePath values outright to prevent path replacement
+                if (Path.of(it.filePath).isAbsolute) {
+                    LOG.debug { "Skipping finding with absolute filePath: ${it.filePath}" }
+                    return@mapNotNull null
+                }
+                // Resolve and normalize the path, then verify it stays within the project root
+                val resolvedPath = normalizedProjectRoot.resolve(it.filePath).normalize()
+                if (!resolvedPath.startsWith(normalizedProjectRoot)) {
+                    LOG.debug { "Skipping finding with filePath that escapes project root: ${it.filePath}" }
+                    return@mapNotNull null
+                }
+                LocalFileSystem.getInstance().findFileByIoFile(resolvedPath.toFile())
+            } catch (e: InvalidPathException) {
+                LOG.debug { "Cannot find file at location ${it.filePath}" }
+                null
             } catch (e: Exception) {
                 LOG.debug { "Cannot find file at location ${it.filePath}" }
                 null
