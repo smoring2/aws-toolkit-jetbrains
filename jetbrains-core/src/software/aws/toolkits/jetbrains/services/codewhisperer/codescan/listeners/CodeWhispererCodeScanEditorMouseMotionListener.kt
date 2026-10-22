@@ -12,6 +12,7 @@ import com.intellij.openapi.editor.event.EditorMouseEventArea
 import com.intellij.openapi.editor.event.EditorMouseMotionListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.psi.PsiDocumentManager
@@ -33,6 +34,7 @@ import software.aws.toolkits.jetbrains.utils.notifyInfo
 import software.aws.toolkits.resources.message
 import software.aws.toolkits.telemetry.Result
 import java.awt.Dimension
+import java.nio.file.Path
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -286,6 +288,18 @@ class CodeWhispererCodeScanEditorMouseMotionListener(private val project: Projec
 
     private fun handleApplyFix(issue: CodeWhispererCodeScanIssue) {
         try {
+            // Defence in depth: verify the issue file is contained within the project root before applying any fix.
+            val projectDir = issue.project.guessProjectDir()
+            if (projectDir != null) {
+                val normalizedProjectRoot = Path.of(projectDir.path).normalize()
+                val normalizedFilePath = Path.of(issue.file.path).normalize()
+                if (!normalizedFilePath.startsWith(normalizedProjectRoot)) {
+                    LOG.error { "Apply fix blocked: file ${issue.file.path} is outside project root ${projectDir.path}" }
+                    notifyError(message("codewhisperer.codescan.fix_applied_fail", "File is outside project root"))
+                    return
+                }
+            }
+
             WriteCommandAction.runWriteCommandAction(issue.project) {
                 val document = FileDocumentManager.getInstance().getDocument(issue.file) ?: return@runWriteCommandAction
 
